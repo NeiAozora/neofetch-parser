@@ -44,7 +44,7 @@ To compile Parse Neofetch, follow these steps:
 1. Clone the repository
 2. Navigate to the project directory:
 ```shell
-cd parse-neofetch
+cd neofetch-parser
 ```
 3. Compile the code using a C++ compiler. For example, using `g++`:
 ```shell
