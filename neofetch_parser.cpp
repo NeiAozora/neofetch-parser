@@ -212,9 +212,14 @@ std::string parseNeofetchOutput(const std::string& output) {
     }
 
     int titleArrayPos = getKeyOffsetBySubstring(lines, "----") - 1;
-    std::string title = getLastWordFromString(lines[titleArrayPos]);
+    std::string title;
 
-    parsedInfo["title"] = title;
+    if (titleArrayPos >= 0 && titleArrayPos < lines.size()) {
+        title = getLastWordFromString(lines[titleArrayPos]);
+    } else {
+        title = "Unknown";
+    }
+
 
     for (const std::string& line : lines) {
         std::string strPosition = findKeyPositionInString(labels, line);
@@ -250,37 +255,53 @@ std::string parseNeofetchOutput(const std::string& output) {
     return jsonEncode(parsedInfo);
 }
 
+// Function to check if the file exists
+bool isFileExist(const std::string& filename) {
+    std::ifstream file(filename);
+    return file.fail();
+}
+
 void printHelp() {
-    std::cout << "Usage: parse_neofetch [OPTIONS]" << std::endl;
+    std::cout << "Usage: parse_neofetch <filename> [OPTIONS]" << std::endl;
     std::cout << "Options:" << std::endl;
-    std::cout << std::left << std::setw(20) << "  --load-from FILE"
-              << "Specify the input file (default file name: output)" << std::endl;
-    std::cout << std::left << std::setw(20) << "  -o FILE, --output FILE"
-              << "Specify the output file (default file name: parsed_result.json)" << std::endl;
-    std::cout << std::left << std::setw(20) << "  --json-pretty"
-              << "Format the JSON output with indentation and line breaks" << std::endl;
-    std::cout << std::left << std::setw(20) << "  --help, -h"
+    std::cout << std::left << std::setw(27) << "  -o FILE, --output FILE "
+              << "   Specify the output file (default file name: parsed_result.json)" << std::endl;
+    std::cout << std::left << std::setw(26) << "           --json-pretty"
+              << "    Format the JSON output with indentation and line breaks" << std::endl;
+    std::cout << std::left << std::setw(30) << "  -h, --help"
               << "Display this help message" << std::endl;
     std::cout << std::endl;
     std::cout << "Description:" << std::endl;
     std::cout << "  This program parses neofetch output and generates JSON data." << std::endl;
     std::cout << "  The output can be optionally formatted using JSON pretty print." << std::endl;
-    std::cout << "  If you know PHP, you get the idea ;)" << std::endl;
+    std::cout << "  If you know PHP, you get the idea of JSON feature above ;)" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
-    std::string inputFileName = "output";
+    std::string inputFileName = "";
     std::string outputFileName = "parsed_result.json";
     bool useJsonPrettyPrint = false;
 
     // Process command-line arguments
+    bool inputFileSpecified = false;  // Flag to track if input file has been specified
+
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
 
-        if (arg == "--load-from" || arg == "-l" && i + 1 < argc) {
-            inputFileName = argv[i + 1];
-            i++;
-        } else if (arg == "-o" && i + 1 < argc || arg == "--output" && i + 1 < argc) {
+        if (!inputFileSpecified && i + 1 < argc) {
+            // Check if the argument starts with './parse_neofetch' followed by a filename
+            std::string pattern = "./parse_neofetch";
+            std::string argument = arg.substr(0, pattern.length());
+
+            if (argument == pattern) {
+                inputFileName = argv[i + 1];
+                i++;
+                inputFileSpecified = true;
+                continue;
+            }
+        }
+
+        if (arg == "-o" && i + 1 < argc || arg == "--output" && i + 1 < argc) {
             outputFileName = argv[i + 1];
             i++;
         } else if (arg == "--json-pretty") {
@@ -293,6 +314,20 @@ int main(int argc, char* argv[]) {
             printHelp();
             return 1;
         }
+    }
+
+    if (!inputFileSpecified) {
+        std::cerr << "Please specify the filename to load!" << std::endl;
+        printHelp();
+        return 1;
+    }
+
+
+    // Check if input file exists
+    if (!isFileExist(inputFileName)) {
+        std::cerr << "The specified file '" << inputFileName <<  "' does not exist or cannot be open!." << std::endl;
+        printHelp();
+        return 1;
     }
 
     // Read input from file

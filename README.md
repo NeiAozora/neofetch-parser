@@ -61,10 +61,11 @@ The executable parse_neofetch will be generated. You can run it by executing:
 ## Usage
 
 ```shell
-parse_neofetch [OPTIONS]
+parse_neofetch <filename> [OPTIONS]
 ```
+specify the file name to load without including <>
+
 ## Options
-* --load-from FILE, -l FILE: Specify the input file (default file name: output)
 * -o FILE, --output FILE: Specify the output file (default file name: parsed_result.json)
 * --json-pretty: Format the JSON output with indentation and line breaks
 * --help, -h: Display the help message
@@ -73,7 +74,7 @@ parse_neofetch [OPTIONS]
 
 Parse Neofetch output from neofetch_output.txt and save the result to result.json:
 ```shell
-parse_neofetch --load-from neofetch_output.txt -o result.json
+parse_neofetch neofetch_output.txt -o result.json
 ```
 
 Parse Neofetch output from the default file output and enable JSON pretty print:
@@ -87,6 +88,4 @@ Contributions are welcome! If you have any ideas, suggestions, or bug reports, p
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
 
-```vbnet
 Feel free to modify and customize the README file to fit your project's specific needs.
-```
