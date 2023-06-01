@@ -10,7 +10,6 @@ Parse Neofetch is a command-line utility written in C++ for parsing and generati
 
 ## Table of Contents
 
-```markdown
 - [Minimum C++ Standard](#minimum-c-standard)
 - [Naming Convention](#naming-convention)
 - [Platform Support](#platform-support)
@@ -20,7 +19,7 @@ Parse Neofetch is a command-line utility written in C++ for parsing and generati
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
-```
+
 
 ## Minimum C++ Standard
 
