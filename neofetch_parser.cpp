@@ -1,7 +1,7 @@
 /*
  * MIT License
  * 
- * Copyright (c) 2023 Ahmad Fauzan <noxindocraft@gmail.com 
+ * Copyright (c) 2023 Ahmad Fauzan <noxindocraft@gmail.com> 
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@
 #include <sstream>
 #include <algorithm>
 #include <regex>
+#include <filesystem>
 
 // Function to escape special characters in a string
 std::string escapeString(const std::string& input) {
@@ -257,8 +258,26 @@ std::string parseNeofetchOutput(const std::string& output) {
 
 // Function to check if the file exists
 bool isFileExist(const std::string& filename) {
-    std::ifstream file(filename);
-    return file.fail();
+    
+    // why is this shit doesn't work 
+    // std::ifstream file(filename);
+    // return file.fail();
+
+    // even this one
+    // return file.good();  // Use file.good() to check if the file exists and can be opened
+
+
+    // nor this one
+    // return std::filesystem::exists(filename);
+
+    // welp i don't have a choice then
+    FILE* file = fopen(filename.c_str(), "r");
+    if (file) {
+        fclose(file);
+        return true;
+    }
+    return false;
+
 }
 
 void printHelp() {
@@ -288,17 +307,10 @@ int main(int argc, char* argv[]) {
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
 
-        if (!inputFileSpecified && i + 1 < argc) {
-            // Check if the argument starts with './parse_neofetch' followed by a filename
-            std::string pattern = "./parse_neofetch";
-            std::string argument = arg.substr(0, pattern.length());
-
-            if (argument == pattern) {
-                inputFileName = argv[i + 1];
-                i++;
-                inputFileSpecified = true;
-                continue;
-            }
+        if (!inputFileSpecified && arg != "-o" && arg != "--output" && arg != "--json-pretty" && arg != "--help" && arg != "-h") {
+            inputFileName = arg;
+            inputFileSpecified = true;
+            continue;
         }
 
         if (arg == "-o" && i + 1 < argc || arg == "--output" && i + 1 < argc) {
@@ -326,7 +338,6 @@ int main(int argc, char* argv[]) {
     // Check if input file exists
     if (!isFileExist(inputFileName)) {
         std::cerr << "The specified file '" << inputFileName <<  "' does not exist or cannot be open!." << std::endl;
-        printHelp();
         return 1;
     }
 
