@@ -71,7 +71,7 @@ specify the file name to load without including <>
 
 ## Examples
 
-But first, you need to retrieve the output and save it to neofetch_output.txt. 
+retrieve the output and save it to neofetch_output.txt. 
 You can name it anything you want.
 ```shell
 neofetch > neofetch_output.txt
