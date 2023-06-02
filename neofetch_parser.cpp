@@ -20,7 +20,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- */
+*/
 
 #include <iostream>
 #include <fstream>
@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <regex>
 #include <filesystem>
+#include "include/vardump.h"   
 
 // Function to escape special characters in a string
 std::string escapeString(const std::string& input) {
@@ -181,23 +182,35 @@ std::string removeAnsiEscapeCodes(const std::string& str) {
     return std::regex_replace(str, pattern, "");
 }
 
+
+
 // Function to parse neofetch output and generate JSON
 std::string parseNeofetchOutput(const std::string& output) {
     std::vector<std::string> labels = {
         "OS",
-        "Host",
+        "Host", 
         "Kernel",
-        "Uptime",
+        "Uptime", 
         "Packages",
         "Shell",
         "Resolution",
-        "DE",
+        "DE", 
         "WM",
-        "WM Theme",
-        "Terminal",
+        "Theme", 
+        "Icons", 
+        "Terminal",  
         "CPU",
         "GPU",
-        "Memory"
+        "Memory",
+        "GPU",
+        "Disk",
+        "Battery",
+        "Font",
+        "Song",
+        "Local",
+        "Public",
+        "Users",
+        "Locale" 
     };
 
     std::map<std::string, std::string> parsedInfo;
@@ -216,34 +229,32 @@ std::string parseNeofetchOutput(const std::string& output) {
     std::string title;
 
     if (titleArrayPos >= 0 && titleArrayPos < lines.size()) {
-        title = getLastWordFromString(lines[titleArrayPos]);
-    } else {
-        title = "Unknown";
+        parsedInfo["title"] = getLastWordFromString(lines[titleArrayPos]);
     }
 
+        for (const std::string& line : lines) {
+            std::string strPosition = findKeyPositionInString(labels, line);
 
-    for (const std::string& line : lines) {
-        std::string strPosition = findKeyPositionInString(labels, line);
+            if (strPosition == "-1") {
+                continue;
+            }
 
-        if (strPosition == "-1") {
-            continue;
-        }
+            size_t separatorPos = line.find(':');
+            // the line above returned number above the line's length when it fails to find the ':'
 
-        size_t separatorPos = line.find(':');
+            if (separatorPos > line.length()){
+                continue;
+            }
+
 
         std::string label = line.substr(0, separatorPos);
         std::string value = line.substr(separatorPos + 1);
 
         label = label.substr(label.find_first_not_of(" \t"));
         label = label.substr(0, label.find_last_not_of(" \t") + 1);
-        
-        std::transform( label.begin(), 
-                        label.end(), 
-                        label.begin(), 
-                        [](unsigned char c) { 
-                            return std::tolower(c); 
-                        });
 
+        std::transform(label.begin(), label.end(), label.begin(),
+                    [](unsigned char c) { return std::tolower(c); });
 
         value = value.substr(value.find_first_not_of(" \t"));
         value = value.substr(0, value.find_last_not_of(" \t") + 1);
@@ -252,32 +263,19 @@ std::string parseNeofetchOutput(const std::string& output) {
             parsedInfo[label] = value;
         }
     }
+    
 
     return jsonEncode(parsedInfo);
 }
 
 // Function to check if the file exists
 bool isFileExist(const std::string& filename) {
-    
-    // why is this shit doesn't work 
-    // std::ifstream file(filename);
-    // return file.fail();
-
-    // even this one
-    // return file.good();  // Use file.good() to check if the file exists and can be opened
-
-
-    // nor this one
-    // return std::filesystem::exists(filename);
-
-    // welp i don't have a choice then
     FILE* file = fopen(filename.c_str(), "r");
     if (file) {
         fclose(file);
         return true;
     }
     return false;
-
 }
 
 void printHelp() {
