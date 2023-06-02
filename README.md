@@ -71,6 +71,12 @@ specify the file name to load without including <>
 
 ## Examples
 
+But first, you need to retrieve the output and save it to neofetch_output.txt. 
+You can name it anything you want.
+```shell
+neofetch > neofetch_output.txt
+```
+
 Parse Neofetch output from neofetch_output.txt and save the result to result.json:
 ```shell
 parse_neofetch neofetch_output.txt -o result.json
